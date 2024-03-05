@@ -1,0 +1,26 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/avr-gcc",
+      "-c",
+      "-mmcu=atmega328p",
+      "-I.",
+      "-g",
+      "-Os",
+      "-funsigned-char",
+      "-funsigned-bitfields",
+      "-fpack-struct",
+      "-fshort-enums",
+      "-Wall",
+      "-Wstrict-prototypes",
+      "-Wa,-adhlns=main.lst",
+      "-std=gnu99",
+      "-o",
+      "main.o",
+      "main.c"
+    ],
+    "directory": "/home/vanilla/Documents/autumn24/embedded/test/src",
+    "file": "/home/vanilla/Documents/autumn24/embedded/test/src/main.c",
+    "output": "/home/vanilla/Documents/autumn24/embedded/test/src/main.o"
+  }
+]
