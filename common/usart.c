@@ -36,7 +36,7 @@ void usart_tx_string(const char *pStr)
   }
 }
 
-void usart_tx_float(float x, char num_digits_int, char num_digits_decimal)
+void usart_tx_float(float x, char num_digits_int, int num_digits_decimal)
 {
   char num_elements = num_digits_int + num_digits_decimal + 1 + 1; // one decimal point and one null terminator
   char buffer[num_elements];
