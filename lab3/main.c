@@ -29,6 +29,7 @@ int main(void) {
     DDRB |= (1 << PINB5);
 
     PORTB &= ~(1 << PINB5);
+    PORTD |= (1 << BUTTON);
 
     _delay_ms(700);
 
@@ -48,7 +49,7 @@ int main(void) {
 	long time = get_pulse();
 
 	double distance_cm = time * SPEED_SOUND/2;
-	char char_buf[7];
+	char char_buf[8];
 
 	if (!(PINB & (1 << PINB5))) {
 	    dtostrf(distance_cm, 7, 3, char_buf);
@@ -99,6 +100,7 @@ long get_pulse(void) {
   }
 
   while ((PIND & (1 << ECHO))) {
+    _delay_us(1);
     time_elapsed += 1;
   }
 

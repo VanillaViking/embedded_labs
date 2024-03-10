@@ -1,10 +1,10 @@
 [
   {
     "arguments": [
-      "/usr/bin/avr-gcc",
+      "/nix/store/5l6aycphac62f9kslr7xw7xwgc020yv4-avr-gcc-13.2.0/bin/avr-gcc",
       "-c",
       "-mmcu=atmega328p",
-      "-I.",
+      "-I",
       "-g",
       "-Os",
       "-funsigned-char",
@@ -19,8 +19,8 @@
       "main.o",
       "main.c"
     ],
-    "directory": "/home/vanilla/Documents/autumn24/embedded/lab3/",
-    "file": "/home/vanilla/Documents/autumn24/embedded/lab3/main.c",
-    "output": "/home/vanilla/Documents/autumn24/embedded/lab3/main.o"
+    "directory": "/home/vanilla/Documents/autumn24/embedded/embedded_labs/lab3/",
+    "file": "/home/vanilla/Documents/autumn24/embedded/embedded_labs/lab3/main.c",
+    "output": "/home/vanilla/Documents/autumn24/embedded/embedded_labs/lab3/main.o"
   }
 ]

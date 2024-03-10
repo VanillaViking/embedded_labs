@@ -15,12 +15,13 @@
 # MCU = attiny13
 # MCU = attiny2313
 # MCU = atmega8
+
 MCU = atmega328p
 
 F_CPU = 16000000
 
 # Target file name (without extension).
-TARGET = main
+TARGET = blink/main
 
 # Programming hardware: type avrdude -c ?
 # to get a full listing.
@@ -41,7 +42,7 @@ OPT = s
 FORMAT = ihex
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).c
+SRC = $(TARGET).c common/usart.c
 
 # If there is more than one source file, append them above, or modify and
 # uncomment the following:
@@ -65,7 +66,7 @@ ASRC =
 
 # List any extra directories to look for include files here.
 #     Each directory must be seperated by a space.
-EXTRAINCDIRS = 
+EXTRAINCDIRS = common
 
 
 # Optional compiler flags.
