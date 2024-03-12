@@ -1,9 +1,9 @@
 .ccls*
-main.hex
-main.d
-main.eep
-main.lst
-main.map
-main.o
-main.elf
+*.hex
+*.d
+*.eep
+*.lst
+*.map
+*.o
+*.elf
 
