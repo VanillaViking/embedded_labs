@@ -27,7 +27,7 @@ ISR(TIMER0_COMPA_vect)
   numOV++;
 }
 
-#define PART2
+#define PART1
 
 
 #ifdef PART1
@@ -40,13 +40,12 @@ int main(void) {
     sei();
 
     while (1) {
-      my_delay_1_23s();
       /* my_delay_us(10000); */
       bitSet(PORTB, PINB5);
+      my_delay_1_23s();
 
-      my_delay_1_23_ctc();
       bitClear(PORTB, PINB5);
-      
+      my_delay_1_23_ctc();
       /* my_delay_us(10000); */
       /* bitSet(PORTD, PIND5): */
 
@@ -72,7 +71,7 @@ void my_delay_1_23s() {
   // normal mode
   set_tc0_mode('0');
   bitSet(TIMSK0, TOIE0);
-  unsigned long numOV_max = 76875;
+  unsigned long long numOV_max = 76875;
 
   numOV = 0;
   TCNT0 = 0;
