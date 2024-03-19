@@ -25,27 +25,52 @@ ISR(TIMER0_COMPA_vect)
   is_waiting = 0;
 }
 
+#define PART2
+
+
+#ifdef PART1
 int main(void) {
+    DDRD = 0xFF;
     usart_init(8);
-    /* bitSet(TIMSK0, TOIE0); */
-    bitSet(TCCR0A, WGM01);
-    bitSet(TIMSK0, OCIE0A);
+    bitSet(TIMSK0, TOIE0);
+    /* bitSet(TCCR0A, WGM01); */
+    /* bitSet(TIMSK0, OCIE0A); */
     sei();
 
     while (1) {
       usart_tx_string(">a:");
       usart_transmit('1');
       usart_transmit('\n');
-      /* my_delay_1e6us(); */
-      my_delay_us(343);
+      my_delay_1e6us();
+      /* my_delay_us(10000); */
 
       usart_tx_string(">a:");
       usart_transmit('0');
       usart_transmit('\n');
       _delay_us(1e6);
+      
+      /* my_delay_us(10000); */
+      /* bitSet(PORTD, PIND5): */
 
     }
 }
+#endif
+#ifdef PART2
+int main(void) {
+    DDRD = 0xFF;
+    usart_init(8);
+    bitSet(TCCR0A, WGM01);
+    bitSet(TIMSK0, OCIE0A);
+    sei();
+
+    while (1) {
+      my_delay_us(10000);
+      bitSet(PORTD, PIND5);
+      my_delay_us(10000);
+      bitClear(PORTD, PIND5);
+    }
+}
+#endif
 
 void my_delay_1e6us() {
   unsigned long numOV_max = 62500;
@@ -61,6 +86,7 @@ void my_delay_1e6us() {
 
 void my_delay_us(unsigned long x) {
   int ticks;
+			  // setting extremely high value just to start out
   int remainder_list[5] = {10000, 10000, 10000, 10000, 10000};
   is_waiting = 1;
   
@@ -98,13 +124,13 @@ void my_delay_us(unsigned long x) {
   // convert int to char
   char P = (prescaler+1) + '0';
 
-  usart_tx_string("prescaler:");
-  usart_transmit(P);
+  /* usart_tx_string("prescaler:"); */
+  /* usart_transmit(P); */
 
   setPrescaler_tc0(P);
   OCR0A = ticks;
-  usart_tx_string("ticks:");
-  usart_tx_float(ticks, 4, 1);
+  /* usart_tx_string("ticks:"); */
+  /* usart_tx_float(ticks, 4, 1); */
   while (is_waiting);
   setPrescaler_tc0('0');
   return;
