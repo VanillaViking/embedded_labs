@@ -43,11 +43,11 @@ int main(void) {
     while (1) {
       /* my_delay_us(10000); */
       bitSet(PORTB, PINB5);
-      my_delay_1_23s();
+      my_delay_ctc(1.23, 205, '4');
+      /* my_delay_ctc(1, 255, '1'); */
 
       bitClear(PORTB, PINB5);
-      my_delay_1_23s();
-      /* my_delay_ctc(1.23, 205, '4'); */
+      my_delay_ctc(1.23, 205, '4');
       /* my_delay_us(10000); */
       /* bitSet(PORTD, PIND5): */
 
@@ -98,7 +98,6 @@ void my_delay_ctc(float x, unsigned char top, char prescaler_option) {
   numOV = 0;
 
   unsigned long numOV_max = (int)(((16e6/p) * x)/top);
-  /* usart_tx_float(numOV_max + 0.0, 4, 1); */
   /* unsigned long numOV_max = 375; */
   while (numOV < numOV_max -1);
   setPrescaler_tc0('0');
