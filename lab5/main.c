@@ -89,16 +89,16 @@ void my_delay_1_23s() {
 
 void my_delay_ctc(float x, unsigned char top, char prescaler_option) {
   // ctc mode
+  numOV = 0;
   set_tc0_mode('2');
   bitSet(TIMSK0, OCIE0A);
-  bitClear(TIMSK0, TOIE0);
   OCR0A = top;
   TCNT0 = 0;
   int p = setPrescaler_tc0(prescaler_option);
-  numOV = 0;
 
   unsigned long numOV_max = (int)(((16e6/p) * x)/top);
   /* unsigned long numOV_max = 375; */
+  /* usart_tx_float(numOV_max + 0.0, 4, 1); */
   while (numOV < numOV_max -1);
   setPrescaler_tc0('0');
 }
