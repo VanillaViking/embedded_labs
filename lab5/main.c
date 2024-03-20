@@ -12,6 +12,7 @@ void my_delay_us(unsigned long x);
 int minimum(int remainder_list[]); 
 
 void my_delay_1_23s();
+void my_delay_ctc(float x, unsigned char top, char prescaler_option);
 void my_delay_1_23_ctc();
 
 volatile unsigned long numOV = 0;
@@ -45,7 +46,8 @@ int main(void) {
       my_delay_1_23s();
 
       bitClear(PORTB, PINB5);
-      my_delay_1_23_ctc();
+      my_delay_1_23s();
+      /* my_delay_ctc(1.23, 205, '4'); */
       /* my_delay_us(10000); */
       /* bitSet(PORTD, PIND5): */
 
@@ -71,28 +73,30 @@ void my_delay_1_23s() {
   // normal mode
   set_tc0_mode('0');
   bitSet(TIMSK0, TOIE0);
-  unsigned long long numOV_max = 76875;
+  unsigned long numOV_max = 62500;
 
   numOV = 0;
   TCNT0 = 0;
   /* bitSet(TCCR0B, CS00); */
   setPrescaler_tc0('1');
   while (numOV < numOV_max -1);
+  setPrescaler_tc0('0');
 
-  bitClear(TCCR0B, CS00);
 }
 
 
-void my_delay_1_23_ctc() {
+void my_delay_ctc(float x, unsigned char top, char prescaler_option) {
   // ctc mode
   set_tc0_mode('2');
   bitSet(TIMSK0, OCIE0A);
-  OCR0A = 205;
+  OCR0A = top;
   TCNT0 = 0;
-  setPrescaler_tc0('5');
+  int p = setPrescaler_tc0(prescaler_option);
   numOV = 0;
 
-  unsigned long numOV_max = 375;
+  unsigned long numOV_max = (int)(((16e6/p) * x)/top);
+  /* usart_tx_float(numOV_max + 0.0, 4, 1); */
+  /* unsigned long numOV_max = 375; */
   while (numOV < numOV_max -1);
   setPrescaler_tc0('0');
 }
@@ -156,22 +160,27 @@ int set_tc0_mode(char option) {
     case '0':
     bitClear(TCCR0A, WGM00);
     bitClear(TCCR0A, WGM01);
-    bitClear(TCCR0A, WGM02);
+    bitClear(TCCR0B, WGM02);
     // PWM, phase correct
     case '1':
     bitSet(TCCR0A, WGM00);
     bitClear(TCCR0A, WGM01);
-    bitClear(TCCR0A, WGM02);
+    bitClear(TCCR0B, WGM02);
     // CTC
     case '2':
     bitClear(TCCR0A, WGM00);
     bitSet(TCCR0A, WGM01);
-    bitClear(TCCR0A, WGM02);
+    bitClear(TCCR0B, WGM02);
     // Fast PWM
     case '3':
     bitSet(TCCR0A, WGM00);
     bitSet(TCCR0A, WGM01);
-    bitClear(TCCR0A, WGM02);
+    bitClear(TCCR0B, WGM02);
+    // Fast PWM TOP mode
+    case '4':
+    bitSet(TCCR0A, WGM00);
+    bitSet(TCCR0A, WGM01);
+    bitSet(TCCR0B, WGM02);
   }
 }
 
@@ -182,31 +191,37 @@ int setPrescaler_tc0(char option) {
       bitClear(TCCR0B, CS00);
       bitClear(TCCR0B, CS01);
       bitClear(TCCR0B, CS02);
+      return 0;
       break;
     case '1':
       bitSet(TCCR0B, CS00);
       bitClear(TCCR0B, CS01);
       bitClear(TCCR0B, CS02);
+      return 1;
       break;
     case '2':
       bitClear(TCCR0B, CS00);
       bitSet(TCCR0B, CS01);
       bitClear(TCCR0B, CS02);
+      return 8;
       break;
     case '3':
       bitSet(TCCR0B, CS00);
       bitSet(TCCR0B, CS01);
       bitClear(TCCR0B, CS02);
+      return 64;
       break;
     case '4':
       bitClear(TCCR0B, CS00);
       bitClear(TCCR0B, CS01);
       bitSet(TCCR0B, CS02);
+      return 256;
       break;
     case '5':
       bitSet(TCCR0B, CS00);
       bitClear(TCCR0B, CS01);
       bitSet(TCCR0B, CS02);
+      return 1024;
       break;
   }
 
