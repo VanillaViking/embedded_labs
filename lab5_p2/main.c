@@ -4,6 +4,7 @@
 #include <avr/interrupt.h>
 #include <math.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "usart.h"
 #include "bit.h"
@@ -22,19 +23,32 @@ uint8_t find_top(double frequency);
 /* } */
 
 int main(void) {
+    usart_init(8);
     bitSet(DDRD, PIND6);
 
     //setting up OCnx pwm pin
-    bitClear(TCCR0A, COM0A0);
-    bitSet(TCCR0A, COM0A1);
-    
-    OCR0A = 128;
-    
-    set_tc0_mode('3');
-    setPrescaler_tc0('4');
+    bitSet(TCCR0A, COM0A0); // set to toggle OC0x every time it reaches TOP
+    bitClear(TCCR0A, COM0A1); 
+
+    // set TOP
+    set_tc0_mode('4');
 
     while (1) {
-
+      OCR0A = find_top(get_frequency('C'));
+      _delay_ms(200);
+      OCR0A = find_top(get_frequency('D'));
+      _delay_ms(200);
+      OCR0A = find_top(get_frequency('E'));
+      _delay_ms(200);
+      OCR0A = find_top(get_frequency('F'));
+      _delay_ms(200);
+      OCR0A = find_top(get_frequency('G'));
+      _delay_ms(200);
+      OCR0A = find_top(get_frequency('A'));
+      _delay_ms(200);
+      OCR0A = find_top(get_frequency('B'));
+      _delay_ms(200);
+      
     }
 }
 
@@ -117,7 +131,27 @@ int setPrescaler_tc0(char option) {
 }
 
 uint8_t find_top(double frequency) {
+  double top_values[6];
+  uint8_t top;
 
+  top_values[0] = 999;
+  top_values[1] = 16000000/(2 * frequency * 1);
+  top_values[2] = 16000000/(2 * frequency * 8);
+  top_values[3] = 16000000/(2 * frequency * 64);
+  top_values[4] = 16000000/(2 * frequency * 256);
+  top_values[5] = 16000000/(2 * frequency * 1024);
+
+  for (int i = 0; i < 6; i++) {
+    if (top_values[i] < 256) {
+      usart_tx_float(i + 0.0, 3, 1);
+      usart_tx_float(top_values[i], 3, 1);
+       top = round(top_values[i]);
+       setPrescaler_tc0(i + '0');
+       break;
+    }
+  }
+  
+  return top;
 }
 
 double get_frequency(char note) {
