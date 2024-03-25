@@ -49,7 +49,6 @@ int main(void) {
       OCR0A = find_top(get_frequency('B'));
       _delay_ms(200);
       
-
     }
 }
 
