@@ -1,17 +1,16 @@
 #include <avr/io.h>
 #include "util/delay.h"
+#include "bit.h"
+#include <avr/interrupt.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #define FOSC 16000000
 #define BAUD 9600
 #define MYUBRR FOSC / 16 / BAUD - 1 
 
-#define BITSET(reg, n) (reg |= 1 << n)
-#define BITREAD(reg, n) (reg & 1 << n)
-#define BITCLEAR(reg, n) (reg &= ~(1 << n))
-
 #define TRIG PIND7
-#define ECHO PIND6
+#define ECHO PIND2
 #define BUTTON PIND3
 
 #define SPEED_SOUND 0.034
@@ -20,6 +19,24 @@ void USART_init(unsigned int ubrr);
 void USART_Transmit(unsigned char data);
 void transmit_text(char* str);
 long get_pulse(void);
+void set_tc0_mode(char mode);
+int setPrescaler_tc0(char option);
+
+volatile int numOV = 0;
+volatile int duration_end = 0;
+volatile bool on = true;
+
+ISR(INT0_vect) {
+    duration_end = 1;
+}
+
+ISR(INT1_vect) {
+    on = !on;
+}
+
+ISR(TIMER0_OVF_vect) {
+  numOV++;
+}
 
 int main(void) {
     USART_init(MYUBRR);
@@ -31,15 +48,36 @@ int main(void) {
     PORTB &= ~(1 << PINB5);
     PORTD |= (1 << BUTTON);
 
+    bitSet(EIMSK, INT0);
+    bitSet(EICRA, ISC00);
+
+    bitSet(EIMSK, INT1);
+    bitSet(EICRA, ISC10);
+    bitSet(EICRA, ISC11);
+
+    // set timer 0 overflow
+    bitSet(TIMSK0, TOIE0);
+
+    set_tc0_mode('0');
+    int p = setPrescaler_tc0('1');
+
+    sei();
+
     _delay_ms(700);
 
     while (1) {
 
-	int pressed = (PIND & 1 << BUTTON);
-        _delay_ms(100);
-	if ((PIND & 1 << BUTTON) == !pressed) {
-	    PORTB ^= (1 << PINB5);
+	if (on == false) {
+	    continue;
 	}
+
+	/* int pressed = (PIND & 1 << BUTTON); */
+        /* _delay_ms(100); */
+	/* if ((PIND & 1 << BUTTON) == !pressed) { */
+	/*     PORTB ^= (1 << PINB5); */
+	/* } */
+
+        _delay_ms(100);
 
 	PORTD &= ~(1 << TRIG);
 	_delay_us(2);
@@ -66,6 +104,30 @@ int main(void) {
 
     }
 
+}
+
+int setPrescaler_tc0(char option)
+{
+  /* clear all CS0n */
+  TCCR0B &= 0b11111000; // Clear bits 2:0
+
+  /* set CS0n accordingly */
+  TCCR0B |= (option - '0');
+
+  /* return prescaler value */
+  int prescalers[] = {0,1,8,64,256,1024};
+  return prescalers[option - '0'];
+}
+
+void set_tc0_mode(char mode)
+{
+  /* clear all WGM0n */
+  TCCR0A &= 0b11111100; // Clear bits 1:0
+  TCCR0B &= 0b11110111; // Clear bit 3
+
+  /* set WGM0n accordingly */
+  TCCR0A |= (0b00000011 & (mode - '0'));
+  TCCR0B |= (0b00001000 & ((mode - '0') << 1));
 }
 
 void USART_init(unsigned int ubrr) {
@@ -99,11 +161,18 @@ long get_pulse(void) {
   while (!(PIND & (1 << ECHO))) {
   }
 
-  while ((PIND & (1 << ECHO))) {
-    _delay_us(1);
-    time_elapsed += 1;
+  TCNT0 = 0;
+  numOV = 0;
+  duration_end = 0;
+  while (duration_end == 0) {
   }
 
+  return numOV * 16; // in microseconds
+}
 
-  return time_elapsed;
+void delay_microsec() {
+  numOV = 0;
+
+  unsigned long numOV_max = 1;
+  while (numOV < numOV_max -1);
 }
