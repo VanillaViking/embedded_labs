@@ -21,7 +21,7 @@ MCU = atmega328p
 F_CPU = 16000000
 
 # Target file name (without extension).
-TARGET = lab7/main
+TARGET = lab8/main
 
 # Programming hardware: type avrdude -c ?
 # to get a full listing.
