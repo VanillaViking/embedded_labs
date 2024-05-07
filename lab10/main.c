@@ -98,10 +98,12 @@ int main(void) {
     /* usart_tx_string("freq>:"); */
     /* usart_tx_float(freq, 5, 1); */
 
-    usart_tx_string("b>:");
-    usart_tx_float(dutyCycle, 5, 3);
-    usart_tx_string("d>:");
-    usart_tx_float(measured_duty, 5, 3);
+    usart_tx_string(">real:");
+    usart_tx_float(dutyCycle * 100, 5, 3);
+    usart_transmit('\n');
+    usart_tx_string(">measured:");
+    usart_tx_float(measured_duty * 100, 5, 3);
+    usart_transmit('\n');
 
 
     /* usart_transmit('\n'); */
