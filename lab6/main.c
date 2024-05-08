@@ -3,6 +3,10 @@
 #include "usart.h"
 #include "bit.h"
 
+void swap();
+
+int is_y = 1;
+
 int main(void) {
   // reference voltage
   usart_init(8);
@@ -15,7 +19,11 @@ int main(void) {
   bitSet(ADCSRA, ADPS0);
 
   // ADC input hcannel
-  ADMUX &= 0xF0; // A0
+  bitSet(ADMUX, MUX0);
+  bitClear(ADMUX, MUX1);
+  bitClear(ADMUX, MUX2);
+  bitClear(ADMUX, MUX3);
+
 
   bitSet(ADCSRA, ADEN);
 
@@ -24,8 +32,32 @@ int main(void) {
     while (ADCSRA & (1 << ADSC));
     uint16_t result = ADCL;
     result |= (ADCH << 8);
-    usart_tx_string(">a:");
-    usart_tx_float(result + 0.0, 3, 1);
-    _delay_ms(100);
+    if (is_y) {
+      usart_tx_string(">y:");
+      usart_tx_float(result, 5, 1);
+    } else {
+      usart_tx_string(">x:");
+      usart_tx_float(result, 5, 1);
+
+    }
+    usart_transmit('\n');
+    swap();
+    _delay_ms(10);
+  }
+}
+
+void swap() {
+  if (is_y == 1) {
+    is_y = 0;
+    bitClear(ADMUX, MUX0);
+    bitClear(ADMUX, MUX1);
+    bitClear(ADMUX, MUX2);
+    bitClear(ADMUX, MUX3);
+  } else {
+    is_y = 1;
+    bitSet(ADMUX, MUX0);
+    bitClear(ADMUX, MUX1);
+    bitClear(ADMUX, MUX2);
+    bitClear(ADMUX, MUX3);
   }
 }
